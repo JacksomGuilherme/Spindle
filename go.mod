@@ -5,6 +5,7 @@ go 1.24.4
 require (
 	github.com/go-chi/chi v1.5.5
 	github.com/google/uuid v1.6.0
+	github.com/gorilla/securecookie v1.1.2
 	github.com/skip2/go-qrcode v0.0.0-20200617195104-da1b6568686e
 	github.com/spf13/viper v1.21.0
 	gorm.io/driver/mysql v1.6.0

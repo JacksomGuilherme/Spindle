@@ -32,6 +32,13 @@ func (s *PairingStore) Create(id string) {
 	}
 }
 
+func (s *PairingStore) Delete(id string) {
+	s.mu.Lock()
+	defer s.mu.Unlock()
+
+	delete(s.pairings, id)
+}
+
 func (s *PairingStore) Get(id string) (*Pairing, bool) {
 	s.mu.RLock()
 	defer s.mu.RUnlock()

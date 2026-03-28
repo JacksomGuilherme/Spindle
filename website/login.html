@@ -1,27 +1,30 @@
 <!DOCTYPE html>
 <html>
+
 <head>
   <title>Login</title>
 </head>
+
 <body>
 
-<h1>Escaneie o QR Code</h1>
+  <h1>Escaneie o QR Code</h1>
 
-<img src="/login/qr?pairing_id={{.PairingID}}" />
-<a target="_blank" href="{{.AuthUrl}}">Ou autorize clicando aqui</a>
-<script>
-const pairingId = "{{.PairingID}}";
+  <img src="/login/qr?pairing_id={{.PairingID}}" />
+  <a target="_blank" href="{{.AuthUrl}}">Ou autorise clicando aqui</a>
+  <script>
+    const pairingId = "{{.PairingID}}";
 
-setInterval(() => {
-  fetch(`/auth/spotify/login/status?state=${pairingId}`)
-    .then(res => res.text())
-    .then(data => {
-      if (data === "ok") {
-        window.location = "/";
-      }
-    });
-}, 2000);
-</script>
+    setInterval(() => {
+      fetch(`/auth/spotify/login/status?state=${pairingId}`)
+        .then(res => res.text())
+        .then(data => {
+          if (data === "ok") {
+            window.location = "/"
+          }
+        });
+    }, 2000)
+  </script>
 
 </body>
+
 </html>

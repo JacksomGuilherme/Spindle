@@ -14,6 +14,7 @@ import (
 
 func main() {
 	config := configs.LoadConfig(".")
+	utils.ConfigurarCookies(config)
 
 	r := chi.NewRouter()
 	r.Use(middleware.Logger)
@@ -21,28 +22,29 @@ func main() {
 
 	utils.CarregarTemplates()
 
-	pairingStore := utils.NewPairingStore()
-	loginHandler := handlers.NewLoginHandler(pairingStore, config)
-
-	r.Route("/login", func(r chi.Router) {
-		r.Get("/", loginHandler.Login)
-		r.Get("/qr", loginHandler.GetQRCode)
-	})
-
 	db, err := database.GetConnection(config)
 	if err != nil {
 		panic(err)
 	}
 
 	userDB := database.NewUserRepository(db)
+
+	pairingStore := utils.NewPairingStore()
+	loginHandler := handlers.NewLoginHandler(pairingStore, config, userDB)
+
+	r.Route("/", func(r chi.Router) {
+		r.Get("/", handlers.Home)
+		r.Get("/login", loginHandler.Login)
+		r.Get("/loggout", loginHandler.Loggout)
+		r.Get("/login/qr", loginHandler.GetQRCode)
+	})
+
 	spotifyLogin := handlers.NewSpotifyLoginHandler(pairingStore, config, userDB)
 	r.Route("/auth", func(r chi.Router) {
 		r.Get("/spotify/login", spotifyLogin.Auth)
 		r.Get("/spotify/callback", spotifyLogin.Callback)
 		r.Get("/spotify/login/status", spotifyLogin.Status)
 	})
-
-	r.Get("/", handlers.Home)
 
 	go pairingStore.Cleanup()
 	http.ListenAndServe(fmt.Sprintf(":%s", config.WebServerPort), r)

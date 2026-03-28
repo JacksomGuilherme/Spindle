@@ -5,6 +5,7 @@ import (
 	"net/http"
 
 	"github.com/JacksomGuilherme/Kindle-Spotify-Controller/configs"
+	"github.com/JacksomGuilherme/Kindle-Spotify-Controller/infra/database"
 	"github.com/JacksomGuilherme/Kindle-Spotify-Controller/internal/entity"
 	"github.com/JacksomGuilherme/Kindle-Spotify-Controller/internal/utils"
 	"github.com/skip2/go-qrcode"
@@ -13,16 +14,25 @@ import (
 type LoginHandler struct {
 	PairingStore *utils.PairingStore
 	Config       *configs.Config
+	UserDB       database.UserInterface
 }
 
-func NewLoginHandler(pairingStore *utils.PairingStore, config *configs.Config) *LoginHandler {
+func NewLoginHandler(pairingStore *utils.PairingStore, config *configs.Config, userDB database.UserInterface) *LoginHandler {
 	return &LoginHandler{
 		PairingStore: pairingStore,
 		Config:       config,
+		UserDB:       userDB,
 	}
 }
 
 func (h *LoginHandler) Login(w http.ResponseWriter, r *http.Request) {
+	cookie, _ := utils.LerCookie(r)
+
+	if cookie["session_id"] != "" {
+		http.Redirect(w, r, "/", 302)
+		return
+	}
+
 	pairingID := entity.NewID().String()
 
 	h.PairingStore.Create(pairingID)
@@ -32,6 +42,14 @@ func (h *LoginHandler) Login(w http.ResponseWriter, r *http.Request) {
 		"PairingID": pairingID,
 		"AuthUrl":   url,
 	})
+}
+
+func (h *LoginHandler) Loggout(w http.ResponseWriter, r *http.Request) {
+	cookie, _ := utils.LerCookie(r)
+	userID := cookie["session_id"]
+	utils.DeletarCookie(w)
+	h.UserDB.Delete(userID)
+	http.Redirect(w, r, "/login", 302)
 }
 
 func (h *LoginHandler) GetQRCode(w http.ResponseWriter, r *http.Request) {

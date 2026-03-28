@@ -15,6 +15,8 @@ type Config struct {
 	AppClientID     string `mapstructure:"APP_CLIENT_ID"`
 	AppClientSecret string `mapstructure:"APP_CLIENT_SECRET"`
 	Dns             string `mapstructure:"DNS"`
+	HashKey         string `mapstructure:"HASH_KEY"`
+	BlockKey        string `mapstructure:"BLOCK_KEY"`
 }
 
 func LoadConfig(path string) *Config {

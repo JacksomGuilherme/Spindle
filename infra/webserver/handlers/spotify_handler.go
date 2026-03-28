@@ -54,7 +54,7 @@ func (h *SpotifyLoginHandler) Callback(w http.ResponseWriter, r *http.Request) {
 
 	token, err := exchangeCodeForToken(code, h.Config)
 	if err != nil {
-		http.Error(w, err.Error(), 500)
+		w.WriteHeader(http.StatusBadRequest)
 		return
 	}
 
@@ -65,7 +65,7 @@ func (h *SpotifyLoginHandler) Callback(w http.ResponseWriter, r *http.Request) {
 
 	h.UserDB.Create(user)
 
-	w.WriteHeader(http.StatusOK)
+	utils.ExecutarTemplate(w, "callback", nil)
 }
 
 func (h *SpotifyLoginHandler) Status(w http.ResponseWriter, r *http.Request) {
@@ -78,6 +78,14 @@ func (h *SpotifyLoginHandler) Status(w http.ResponseWriter, r *http.Request) {
 	}
 
 	if p.Authenticated {
+		err := utils.SalvarCookie(w, p.UserID)
+		if err != nil {
+			w.WriteHeader(http.StatusBadRequest)
+			return
+		}
+
+		h.PairingStore.Delete(pairingID)
+
 		w.Write([]byte("ok"))
 		return
 	}
