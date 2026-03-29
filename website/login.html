@@ -2,15 +2,31 @@
 <html>
 
 <head>
-  <title>Login</title>
+    {{ template "head" }}
+    <title>Spindle - Login</title>
 </head>
+
 
 <body>
 
-  <h1>Escaneie o QR Code</h1>
+  <div class="container">
+    <h1>Spindle</h1>
+    <p>Scan the QR code with your phone to connect Spotify</p>
 
-  <img src="/login/qr?pairing_id={{.PairingID}}" />
-  <a target="_blank" href="{{.AuthUrl}}">Ou autorise clicando aqui</a>
+    <div class="login-card">
+      <div class="qr">
+        <img src="/login/qr?pairing_id={{.PairingID}}" />
+      </div>
+      <div class="d-grid gap-0 row-gap-1 text-sm text-muted">
+        <p>1. Scan the QR code with your phone</p>
+        <p>2. Log in to Spotify on your phone</p>
+        <p>3. Return here when done</p>
+      </div>
+      <hr>
+      <a target="_blank" href="{{.AuthUrl}}">Or authorize here</a>
+    </div>
+  </div>
+
   <script>
     const pairingId = "{{.PairingID}}";
 

@@ -26,13 +26,6 @@ func NewLoginHandler(pairingStore *utils.PairingStore, config *configs.Config, u
 }
 
 func (h *LoginHandler) Login(w http.ResponseWriter, r *http.Request) {
-	cookie, _ := utils.LerCookie(r)
-
-	if cookie["session_id"] != "" {
-		http.Redirect(w, r, "/", 302)
-		return
-	}
-
 	pairingID := entity.NewID().String()
 
 	h.PairingStore.Create(pairingID)
@@ -44,7 +37,7 @@ func (h *LoginHandler) Login(w http.ResponseWriter, r *http.Request) {
 	})
 }
 
-func (h *LoginHandler) Loggout(w http.ResponseWriter, r *http.Request) {
+func (h *LoginHandler) Logout(w http.ResponseWriter, r *http.Request) {
 	cookie, _ := utils.LerCookie(r)
 	userID := cookie["session_id"]
 	utils.DeletarCookie(w)

@@ -7,21 +7,37 @@ type TokenResponse struct {
 	RefreshToken string `json:"refresh_token"`
 }
 
-type PlaylistImagesResponse struct {
+type SpotifyItemImages struct {
 	URL    string `json:"url"`
 	Width  int    `json:"width"`
 	Height int    `json:"height"`
 }
 
-type PlaylistsResponse struct {
-	ID         string                   `json:"id"`
-	Name       string                   `json:"name"`
-	ImageURL   []PlaylistImagesResponse `json:"images"`
-	ContextURI string
+type SpotifyItem struct {
+	ID         string              `json:"id"`
+	Name       string              `json:"name"`
+	Images     []SpotifyItemImages `json:"images"`
+	ContextURI string              `json:"uri"`
 }
 
-type PlaylistsAPIResponse struct {
-	Items []PlaylistsResponse `json:"items"`
+type SpotifyAPIResponse struct {
+	Items []SpotifyItem `json:"items"`
+}
+
+type SpotifyArtist struct {
+	Items []SpotifyItem `json:"items"`
+}
+
+type SpotifyAlbum struct {
+	Album SpotifyItem `json:"album"`
+}
+
+type SpotifyArtistsAPIResponse struct {
+	Artists SpotifyArtist `json:"artists"`
+}
+
+type SpotifyAlbumAPIResponse struct {
+	Albums []SpotifyAlbum `json:"items"`
 }
 
 type Device struct {

@@ -1,13 +1,12 @@
 package handlers
 
 import (
-	"encoding/json"
 	"net/http"
 
 	"github.com/JacksomGuilherme/Kindle-Spotify-Controller/configs"
 	"github.com/JacksomGuilherme/Kindle-Spotify-Controller/infra/database"
-	"github.com/JacksomGuilherme/Kindle-Spotify-Controller/internal/dao"
 	"github.com/JacksomGuilherme/Kindle-Spotify-Controller/internal/entity"
+	"github.com/JacksomGuilherme/Kindle-Spotify-Controller/internal/services"
 	"github.com/JacksomGuilherme/Kindle-Spotify-Controller/internal/utils"
 )
 
@@ -24,6 +23,11 @@ func NewHomeHandler(config *configs.Config, userDB database.UserInterface) *Home
 }
 
 func (h *HomeHandler) Home(w http.ResponseWriter, r *http.Request) {
+	tab := r.URL.Query().Get("tab")
+	if tab == "" {
+		tab = "playlists"
+	}
+
 	cookie, _ := utils.LerCookie(r)
 
 	if cookie["session_id"] == "" {
@@ -32,65 +36,36 @@ func (h *HomeHandler) Home(w http.ResponseWriter, r *http.Request) {
 	}
 	user, err := h.UserDB.FindBySpotifyUserId(cookie["session_id"])
 	if user == nil || err != nil {
+		utils.DeletarCookie(w)
 		http.Redirect(w, r, "/login", 302)
 		return
 	}
 
-	userDevices, err := getUserDevices(user)
+	userDevices, err := services.GetUserDevices(user, h.UserDB, h.Config)
 	if err != nil {
 		w.WriteHeader(http.StatusInternalServerError)
 		return
 	}
+	var content interface{}
 
-	userPlaylists, err := getUserPlaylists(user)
-	if err != nil {
-		w.WriteHeader(http.StatusInternalServerError)
-		return
-	}
+	content = getContent(tab, user, h.UserDB, h.Config)
 
 	utils.ExecutarTemplate(w, "home", map[string]interface{}{
-		"Playlists":       userPlaylists,
+		"Content":         content,
 		"Devices":         userDevices,
-		"DeviceConnected": len(userDevices) > 0,
+		"DeviceConnected": true,
+		"ActiveTab":       tab,
 	})
 }
 
-func getUserPlaylists(user *entity.User) ([]dao.PlaylistsResponse, error) {
-	req, err := http.NewRequest("GET", "https://api.spotify.com/v1/me/playlists", nil)
-	if err != nil {
-		return nil, err
+func getContent(tab string, user *entity.User, userDB database.UserInterface, config *configs.Config) interface{} {
+	switch tab {
+	case "playlists":
+		return services.GetUserPlaylists(user, userDB, config)
+	case "artists":
+		return services.GetUserFollowedArtists(user, userDB, config)
+	case "albums":
+		return services.GetUserSavedAlbums(user, userDB, config)
 	}
-	req.Header.Set("Authorization", "Bearer "+user.AccessToken)
-
-	resp, err := http.DefaultClient.Do(req)
-	if err != nil {
-		return nil, err
-	}
-	defer resp.Body.Close()
-
-	var apiResponse dao.PlaylistsAPIResponse
-
-	json.NewDecoder(resp.Body).Decode(&apiResponse)
-
-	return apiResponse.Items, nil
-}
-
-func getUserDevices(user *entity.User) ([]dao.Device, error) {
-	req, err := http.NewRequest("GET", "https://api.spotify.com/v1/me/player/devices", nil)
-	if err != nil {
-		return nil, err
-	}
-	req.Header.Set("Authorization", "Bearer "+user.AccessToken)
-
-	resp, err := http.DefaultClient.Do(req)
-	if err != nil {
-		return nil, err
-	}
-	defer resp.Body.Close()
-
-	var apiResponse dao.DevicesAPIResponse
-
-	json.NewDecoder(resp.Body).Decode(&apiResponse)
-
-	return apiResponse.Devices, nil
+	return nil
 }

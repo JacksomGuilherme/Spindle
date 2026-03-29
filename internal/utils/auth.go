@@ -44,7 +44,7 @@ func ExchangeCodeForToken(code string, config *configs.Config) (*dao.TokenRespon
 	return &token, nil
 }
 
-func GetValidAccessToken(user *entity.User, userDB *database.UserRepository, config *configs.Config) (string, error) {
+func GetValidAccessToken(user *entity.User, userDB database.UserInterface, config *configs.Config) (string, error) {
 	if time.Now().Before(user.ExpiresAt) {
 		return user.AccessToken, nil
 	}

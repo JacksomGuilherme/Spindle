@@ -37,7 +37,7 @@ func main() {
 	r.Route("/", func(r chi.Router) {
 		r.Get("/", homeHandler.Home)
 		r.Get("/login", loginHandler.Login)
-		r.Get("/loggout", loginHandler.Loggout)
+		r.Get("/logout", loginHandler.Logout)
 		r.Get("/login/qr", loginHandler.GetQRCode)
 	})
 
@@ -53,6 +53,9 @@ func main() {
 	r.Route("/playback", func(r chi.Router) {
 		r.Post("/play", playbackHander.Play)
 	})
+
+	fs := http.FileServer(http.Dir("../../website/assets"))
+	r.Handle("/assets/*", http.StripPrefix("/assets/", fs))
 
 	go pairingStore.Cleanup()
 	http.ListenAndServeTLS(

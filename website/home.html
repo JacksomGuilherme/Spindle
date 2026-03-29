@@ -2,43 +2,43 @@
 <html lang="en">
 
 <head>
-    <meta charset="UTF-8">
-    <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Document</title>
+    {{ template "head" }}
+    <title>Spindle - Home</title>
 </head>
 
 <body>
-    <h1>Bem vindo ao controlador do spotify no kindle</h1>
-    <a href="/loggout"><button>Desconectar</button></a>
-
-    {{ if .DeviceConnected }}
-        {{ range .Devices }}
-            <input id="device-id" value="{{.ID}}" />
+    <div class="container">
+        <div class="tabs">
+            <button id="playlists" class='tab-btn {{ if eq .ActiveTab "playlists" }} active {{end}}' onclick="openTab('playlists', this)">Playlists</button>
+            <button id="artists" class='tab-btn {{ if eq .ActiveTab "artists" }} active {{end}}' onclick="openTab('artists', this)">Artists</button>
+            <button id="albums" class='tab-btn {{ if eq .ActiveTab "albums" }} active {{end}}' onclick="openTab('albums', this)">Albums</button>
+        </div>
+        {{ if .DeviceConnected }}
+            {{ range .Devices }}
+                <input hidden id="device-id" value="{{.ID}}" />
+            {{end}}
+            <div class="tab-content">
+                {{ range .Content }}
+                <div class="card-item" onclick='play("{{.ContextURI}}")'>
+                    <img src="{{(index .Images 0).URL}}" alt="{{.Name}}">
+                    <span>{{.Name}}</span>
+                </div>
+                {{ end }}
+            </div>
+        {{else}}
+            <h2>Connect one device to continue</h2>
         {{end}}
-        <ul>
-            {{ range .Playlists }}
-            <li><a id="{{.ID}}" onclick="play(this)">{{.Name}}</a></li>
-            {{ end }}
-        </ul>
-    {{else}}
+        <div class="footer">
+            <div class="player-controls">
+                <button onclick="previous()">{{ template "prev" }}</button>
+                <button onclick="togglePlay()">{{ template "play" }}</button>
+                <button onclick="next()">{{ template "next" }}</button>
+            </div>
+        </div>
+        <button onclick="disconnect()">Disconnect</button>
+    </div>
 
-        <h2>Connect one device to continue</h2>
-
-    {{end}}
-
-    <script>
-        function play(element) {
-            console.log(element.id)
-            let deviceId = document.getElementById('device-id').value
-            fetch(`/playback/play?device_id=${deviceId}`, {
-                method: 'POST',
-                headers: {
-                    'Content-Type': 'application/json',
-                },
-                body: JSON.stringify({ context_uri: `spotify:playlist:${element.id}` })
-            })
-        }
-    </script>
+    {{ template "scripts" }}
 
 </body>
 

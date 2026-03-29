@@ -29,7 +29,7 @@ func NewSpotifyLoginHandler(pairingStore *utils.PairingStore, config *configs.Co
 func (h *SpotifyLoginHandler) Auth(w http.ResponseWriter, r *http.Request) {
 	pairingID := r.URL.Query().Get("pairing_id")
 
-	scope := "user-read-private user-read-email user-read-playback-state user-modify-playback-state user-read-currently-playing app-remote-control playlist-read-private user-read-recently-played user-follow-read"
+	scope := "user-library-read user-read-private user-read-email user-read-playback-state user-modify-playback-state user-read-currently-playing app-remote-control playlist-read-private user-read-recently-played user-follow-read"
 	url := fmt.Sprintf("https://accounts.spotify.com/authorize?response_type=code&client_id=%s&scope=%s&redirect_uri=%s:%s/auth/spotify/callback&state=%s",
 		h.Config.AppClientID,
 		scope,
