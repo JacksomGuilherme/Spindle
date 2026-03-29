@@ -32,8 +32,10 @@ func main() {
 	pairingStore := utils.NewPairingStore()
 	loginHandler := handlers.NewLoginHandler(pairingStore, config, userDB)
 
+	homeHandler := handlers.NewHomeHandler(config, userDB)
+
 	r.Route("/", func(r chi.Router) {
-		r.Get("/", handlers.Home)
+		r.Get("/", homeHandler.Home)
 		r.Get("/login", loginHandler.Login)
 		r.Get("/loggout", loginHandler.Loggout)
 		r.Get("/login/qr", loginHandler.GetQRCode)
@@ -46,6 +48,17 @@ func main() {
 		r.Get("/spotify/login/status", spotifyLogin.Status)
 	})
 
+	playbackHander := handlers.NewPlaybackHandler(userDB)
+
+	r.Route("/playback", func(r chi.Router) {
+		r.Post("/play", playbackHander.Play)
+	})
+
 	go pairingStore.Cleanup()
-	http.ListenAndServe(fmt.Sprintf(":%s", config.WebServerPort), r)
+	http.ListenAndServeTLS(
+		fmt.Sprintf(":%s", config.WebServerPort),
+		"localhost.pem",
+		"localhost-key.pem",
+		r,
+	)
 }

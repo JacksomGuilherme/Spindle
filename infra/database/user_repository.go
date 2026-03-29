@@ -17,6 +17,10 @@ func (u *UserRepository) Create(user *entity.User) error {
 	return u.DB.Create(user).Error
 }
 
+func (u *UserRepository) Update(user *entity.User) error {
+	return u.DB.Save(user).Error
+}
+
 func (u *UserRepository) Delete(userID string) error {
 	user, err := u.FindBySpotifyUserId(userID)
 	if err != nil {

@@ -54,6 +54,7 @@ func DeletarCookie(w http.ResponseWriter) {
 		Value:    "",
 		Path:     "/",
 		HttpOnly: true,
+		Secure:   true,
 		Expires:  time.Unix(0, 0),
 	})
 }

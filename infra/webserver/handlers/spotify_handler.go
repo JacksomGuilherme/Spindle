@@ -4,12 +4,10 @@ import (
 	"encoding/json"
 	"fmt"
 	"net/http"
-	"net/url"
-	"strings"
+	"time"
 
 	"github.com/JacksomGuilherme/Kindle-Spotify-Controller/configs"
 	"github.com/JacksomGuilherme/Kindle-Spotify-Controller/infra/database"
-	"github.com/JacksomGuilherme/Kindle-Spotify-Controller/internal/dao"
 	"github.com/JacksomGuilherme/Kindle-Spotify-Controller/internal/entity"
 	"github.com/JacksomGuilherme/Kindle-Spotify-Controller/internal/utils"
 )
@@ -31,7 +29,7 @@ func NewSpotifyLoginHandler(pairingStore *utils.PairingStore, config *configs.Co
 func (h *SpotifyLoginHandler) Auth(w http.ResponseWriter, r *http.Request) {
 	pairingID := r.URL.Query().Get("pairing_id")
 
-	scope := "user-read-private user-read-email"
+	scope := "user-read-private user-read-email user-read-playback-state user-modify-playback-state user-read-currently-playing app-remote-control playlist-read-private user-read-recently-played user-follow-read"
 	url := fmt.Sprintf("https://accounts.spotify.com/authorize?response_type=code&client_id=%s&scope=%s&redirect_uri=%s:%s/auth/spotify/callback&state=%s",
 		h.Config.AppClientID,
 		scope,
@@ -52,7 +50,7 @@ func (h *SpotifyLoginHandler) Callback(w http.ResponseWriter, r *http.Request) {
 		return
 	}
 
-	token, err := exchangeCodeForToken(code, h.Config)
+	token, err := utils.ExchangeCodeForToken(code, h.Config)
 	if err != nil {
 		w.WriteHeader(http.StatusBadRequest)
 		return
@@ -61,7 +59,8 @@ func (h *SpotifyLoginHandler) Callback(w http.ResponseWriter, r *http.Request) {
 	userID, _ := getSpotifyUser(token.AccessToken)
 	h.PairingStore.Authenticate(state, userID)
 
-	user := entity.NewUser(userID, token.RefreshToken, token.ExpiresIn)
+	expiresAt := time.Now().Add(time.Duration(token.ExpiresIn) * time.Second)
+	user := entity.NewUser(userID, token.AccessToken, token.RefreshToken, expiresAt)
 
 	h.UserDB.Create(user)
 
@@ -91,37 +90,6 @@ func (h *SpotifyLoginHandler) Status(w http.ResponseWriter, r *http.Request) {
 	}
 
 	w.Write([]byte("pending"))
-}
-
-func exchangeCodeForToken(code string, config *configs.Config) (*dao.TokenResponse, error) {
-	data := url.Values{}
-	data.Set("grant_type", "authorization_code")
-	data.Set("code", code)
-	data.Set("redirect_uri", "http://127.0.0.1:8080/auth/spotify/callback")
-
-	req, err := http.NewRequest("POST", "https://accounts.spotify.com/api/token", strings.NewReader(data.Encode()))
-	if err != nil {
-		return nil, err
-	}
-
-	req.Header.Set("Content-Type", "application/x-www-form-urlencoded")
-
-	req.SetBasicAuth(config.AppClientID, config.AppClientSecret)
-
-	client := &http.Client{}
-	resp, err := client.Do(req)
-	if err != nil {
-		return nil, err
-	}
-	defer resp.Body.Close()
-
-	var token dao.TokenResponse
-	err = json.NewDecoder(resp.Body).Decode(&token)
-	if err != nil {
-		return nil, err
-	}
-
-	return &token, nil
 }
 
 func getSpotifyUser(accessToken string) (string, error) {

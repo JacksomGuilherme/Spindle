@@ -1,12 +1,45 @@
 <!DOCTYPE html>
 <html lang="en">
+
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>Document</title>
 </head>
+
 <body>
     <h1>Bem vindo ao controlador do spotify no kindle</h1>
     <a href="/loggout"><button>Desconectar</button></a>
+
+    {{ if .DeviceConnected }}
+        {{ range .Devices }}
+            <input id="device-id" value="{{.ID}}" />
+        {{end}}
+        <ul>
+            {{ range .Playlists }}
+            <li><a id="{{.ID}}" onclick="play(this)">{{.Name}}</a></li>
+            {{ end }}
+        </ul>
+    {{else}}
+
+        <h2>Connect one device to continue</h2>
+
+    {{end}}
+
+    <script>
+        function play(element) {
+            console.log(element.id)
+            let deviceId = document.getElementById('device-id').value
+            fetch(`/playback/play?device_id=${deviceId}`, {
+                method: 'POST',
+                headers: {
+                    'Content-Type': 'application/json',
+                },
+                body: JSON.stringify({ context_uri: `spotify:playlist:${element.id}` })
+            })
+        }
+    </script>
+
 </body>
+
 </html>

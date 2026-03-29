@@ -1,16 +1,20 @@
 package entity
 
+import "time"
+
 type User struct {
 	ID            int
 	SpotifyUserId string
+	AccessToken   string
 	RefreshToken  string
-	ExpiresIn     int
+	ExpiresAt     time.Time
 }
 
-func NewUser(spotifyUserId, refreshToken string, expiresIn int) *User {
+func NewUser(spotifyUserId, accesToken, refreshToken string, expiresIn time.Time) *User {
 	return &User{
 		SpotifyUserId: spotifyUserId,
+		AccessToken:   accesToken,
 		RefreshToken:  refreshToken,
-		ExpiresIn:     expiresIn,
+		ExpiresAt:     expiresIn,
 	}
 }
