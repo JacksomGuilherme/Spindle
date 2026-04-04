@@ -15,5 +15,5 @@ func CarregarTemplates() {
 
 // ExecutarTemplate renderiza uma página HTML na tela
 func ExecutarTemplate(w http.ResponseWriter, template string, dados interface{}) {
-	templates.ExecuteTemplate(w, template+".html", dados)
+	templates.ExecuteTemplate(w, template, dados)
 }

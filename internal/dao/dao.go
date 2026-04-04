@@ -20,16 +20,35 @@ type SpotifyItem struct {
 	ContextURI string              `json:"uri"`
 }
 
+type SpotifyPlaybackItem struct {
+	ID         string        `json:"id"`
+	Name       string        `json:"name"`
+	Artists    []SpotifyItem `json:"artists"`
+	ContextURI string        `json:"uri"`
+}
+
 type SpotifyAPIResponse struct {
-	Items []SpotifyItem `json:"items"`
+	Items   []SpotifyItem `json:"items"`
+	Next    string        `json:"next"`
+	Cursors SpotifyCursor `json:"cursors"`
+}
+
+type SpotifyCursor struct {
+	After  string `json:"after"`
+	Before string `json:"before"`
 }
 
 type SpotifyArtist struct {
-	Items []SpotifyItem `json:"items"`
+	Cursors SpotifyCursor `json:"cursors"`
+	Items   []SpotifyItem `json:"items"`
 }
 
 type SpotifyAlbum struct {
 	Album SpotifyItem `json:"album"`
+}
+
+type SpotifyContext struct {
+	URI string `json:"uri"`
 }
 
 type SpotifyArtistsAPIResponse struct {
@@ -37,7 +56,15 @@ type SpotifyArtistsAPIResponse struct {
 }
 
 type SpotifyAlbumAPIResponse struct {
+	Next   string         `json:"next"`
 	Albums []SpotifyAlbum `json:"items"`
+}
+
+type SpotifyPlaybackStateAPIResponse struct {
+	Context    SpotifyContext      `json:"context"`
+	Item       SpotifyPlaybackItem `json:"item"`
+	IsPlaying  bool                `json:"is_playing"`
+	ProgressMs int                 `json:"progress_ms"`
 }
 
 type Device struct {
@@ -51,5 +78,7 @@ type DevicesAPIResponse struct {
 }
 
 type PlaybackRequest struct {
-	ContextURI string `json:"context_uri"`
+	ContextURI string      `json:"context_uri"`
+	Offset     interface{} `json:"offset,omitempty"`
+	PositionMs string      `json:"position_ms"`
 }

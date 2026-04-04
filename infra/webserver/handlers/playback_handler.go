@@ -1,28 +1,30 @@
 package handlers
 
 import (
-	"bytes"
 	"encoding/json"
-	"fmt"
 	"net/http"
 
+	"github.com/JacksomGuilherme/Kindle-Spotify-Controller/configs"
 	"github.com/JacksomGuilherme/Kindle-Spotify-Controller/infra/database"
 	"github.com/JacksomGuilherme/Kindle-Spotify-Controller/internal/dao"
+	"github.com/JacksomGuilherme/Kindle-Spotify-Controller/internal/services"
 	"github.com/JacksomGuilherme/Kindle-Spotify-Controller/internal/utils"
 )
 
 type PlaybackHandler struct {
+	Config *configs.Config
 	UserDB database.UserInterface
 }
 
-func NewPlaybackHandler(userDB database.UserInterface) *PlaybackHandler {
+func NewPlaybackHandler(config *configs.Config, userDB database.UserInterface) *PlaybackHandler {
 	return &PlaybackHandler{
+		Config: config,
 		UserDB: userDB,
 	}
 }
 
 func (h *PlaybackHandler) Play(w http.ResponseWriter, r *http.Request) {
-	deviceId := r.URL.Query().Get("device_id")
+	deviceID := r.URL.Query().Get("device_id")
 
 	var playReq dao.PlaybackRequest
 	err := json.NewDecoder(r.Body).Decode(&playReq)
@@ -30,37 +32,115 @@ func (h *PlaybackHandler) Play(w http.ResponseWriter, r *http.Request) {
 		w.WriteHeader(http.StatusBadRequest)
 		return
 	}
-
-	bodyBytes, err := json.Marshal(playReq)
-	if err != nil {
-		w.WriteHeader(http.StatusInternalServerError)
-		return
-	}
-
-	url := fmt.Sprintf("https://api.spotify.com/v1/me/player/play?device_id=%s", deviceId)
-
-	req, err := http.NewRequest("PUT", url, bytes.NewBuffer(bodyBytes))
-	if err != nil {
-		w.WriteHeader(http.StatusBadRequest)
-		return
-	}
-
 	cookie, _ := utils.LerCookie(r)
-	user, err := h.UserDB.FindBySpotifyUserId(cookie["session_id"])
+
+	err = services.PlayContext(playReq, deviceID, cookie["session_id"], h.UserDB)
 	if err != nil {
 		w.WriteHeader(http.StatusInternalServerError)
 		return
 	}
 
-	req.Header.Set("Content-Type", "application/json")
-	req.Header.Set("Authorization", "Bearer "+user.AccessToken)
-
-	client := &http.Client{}
-	_, err = client.Do(req)
-	if err != nil {
-		w.WriteHeader(http.StatusBadRequest)
+	user, err := h.UserDB.FindBySpotifyUserId(cookie["session_id"])
+	if user == nil || err != nil {
+		utils.DeletarCookie(w)
+		http.Redirect(w, r, "/login", 302)
 		return
 	}
 
 	w.WriteHeader(http.StatusOK)
+}
+
+func (h *PlaybackHandler) Pause(w http.ResponseWriter, r *http.Request) {
+	deviceID := r.URL.Query().Get("device_id")
+	cookie, _ := utils.LerCookie(r)
+	if cookie["session_id"] == "" {
+		http.Redirect(w, r, "/login", 302)
+		return
+	}
+
+	err := services.PausePlayback(deviceID, cookie["session_id"], h.UserDB)
+	if err != nil {
+		w.WriteHeader(http.StatusInternalServerError)
+		return
+	}
+
+	user, err := h.UserDB.FindBySpotifyUserId(cookie["session_id"])
+	if user == nil || err != nil {
+		utils.DeletarCookie(w)
+		http.Redirect(w, r, "/login", 302)
+		return
+	}
+
+	w.WriteHeader(http.StatusOK)
+}
+
+func (h *PlaybackHandler) Next(w http.ResponseWriter, r *http.Request) {
+	deviceID := r.URL.Query().Get("device_id")
+	cookie, _ := utils.LerCookie(r)
+	if cookie["session_id"] == "" {
+		http.Redirect(w, r, "/login", 302)
+		return
+	}
+
+	err := services.SkipToNextSong(deviceID, cookie["session_id"], h.UserDB)
+	if err != nil {
+		w.WriteHeader(http.StatusInternalServerError)
+		return
+	}
+
+	user, err := h.UserDB.FindBySpotifyUserId(cookie["session_id"])
+	if user == nil || err != nil {
+		utils.DeletarCookie(w)
+		http.Redirect(w, r, "/login", 302)
+		return
+	}
+
+	w.WriteHeader(http.StatusOK)
+}
+
+func (h *PlaybackHandler) Previous(w http.ResponseWriter, r *http.Request) {
+	deviceID := r.URL.Query().Get("device_id")
+	cookie, _ := utils.LerCookie(r)
+	if cookie["session_id"] == "" {
+		http.Redirect(w, r, "/login", 302)
+		return
+	}
+
+	err := services.SkipToPreviousSong(deviceID, cookie["session_id"], h.UserDB)
+	if err != nil {
+		w.WriteHeader(http.StatusInternalServerError)
+		return
+	}
+
+	user, err := h.UserDB.FindBySpotifyUserId(cookie["session_id"])
+	if user == nil || err != nil {
+		utils.DeletarCookie(w)
+		http.Redirect(w, r, "/login", 302)
+		return
+	}
+
+	w.WriteHeader(http.StatusOK)
+}
+
+func (h *PlaybackHandler) State(w http.ResponseWriter, r *http.Request) {
+	cookie, _ := utils.LerCookie(r)
+	if cookie["session_id"] == "" {
+		http.Redirect(w, r, "/login", 302)
+		return
+	}
+
+	user, err := h.UserDB.FindBySpotifyUserId(cookie["session_id"])
+	if user == nil || err != nil {
+		utils.DeletarCookie(w)
+		http.Redirect(w, r, "/login", 302)
+		return
+	}
+
+	playBackState, err := services.GetCurrentPlayingSong(user, h.UserDB, h.Config)
+	if err != nil {
+		w.WriteHeader(http.StatusInternalServerError)
+		return
+	}
+
+	json.NewEncoder(w).Encode(playBackState)
 }

@@ -31,7 +31,7 @@ func (h *LoginHandler) Login(w http.ResponseWriter, r *http.Request) {
 	h.PairingStore.Create(pairingID)
 	url := fmt.Sprintf("%s:%s/auth/spotify/login?pairing_id=%s", h.Config.Dns, h.Config.WebServerPort, pairingID)
 
-	utils.ExecutarTemplate(w, "login", map[string]interface{}{
+	utils.ExecutarTemplate(w, "login.html", map[string]interface{}{
 		"PairingID": pairingID,
 		"AuthUrl":   url,
 	})

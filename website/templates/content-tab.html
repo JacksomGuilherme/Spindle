@@ -1,0 +1,50 @@
+{{ define "tab-content" }}
+<div class="tab-content">
+    {{ range .Content }}
+        <div class="card-item" onclick='play("{{.ContextURI}}")'>
+            <img src="{{(index .Images 0).URL}}" alt="{{.Name}}">
+            <span>{{.Name}}</span>
+        </div>
+    {{ end }}
+</div>
+<div class="pagination">
+
+    <!-- PREV -->
+    <button 
+        class="{{ if not .HasPrevious }}page-btn-hidden{{ end }}"
+        {{ if not .HasPrevious }}disabled{{ end }}
+
+        {{ if eq .Tab "artists" }}
+            onclick='changePage("prev")'
+        {{ else }}
+            onclick='changePage({{.Page}} - 1)'
+        {{ end }}
+    >
+        {{ template "prev-page" }}
+    </button>
+
+    <!-- PAGE -->
+    <span>
+        {{ if eq .Tab "artists" }}
+            Page <span id="artist-page">1</span>
+        {{ else }}
+            Page {{.DisplayPage}}
+        {{ end }}
+    </span>
+
+    <!-- NEXT -->
+    <button 
+        class="{{ if not .HasNext }}page-btn-hidden{{ end }}"
+        {{ if not .HasNext }}disabled{{ end }}
+
+        {{ if eq .Tab "artists" }}
+            onclick='changePage("next", "{{.NextCursor}}")'
+        {{ else }}
+            onclick='changePage({{.Page}} + 1, null)'
+        {{ end }}
+    >
+        {{ template "next-page" }}
+    </button>
+
+</div>
+{{ end }}

@@ -8,33 +8,32 @@
 
 <body>
     <div class="container">
-        <div class="tabs">
-            <button id="playlists" class='tab-btn {{ if eq .ActiveTab "playlists" }} active {{end}}' onclick="openTab('playlists', this)">Playlists</button>
-            <button id="artists" class='tab-btn {{ if eq .ActiveTab "artists" }} active {{end}}' onclick="openTab('artists', this)">Artists</button>
-            <button id="albums" class='tab-btn {{ if eq .ActiveTab "albums" }} active {{end}}' onclick="openTab('albums', this)">Albums</button>
-        </div>
         {{ if .DeviceConnected }}
-            {{ range .Devices }}
-                <input hidden id="device-id" value="{{.ID}}" />
-            {{end}}
-            <div class="tab-content">
-                {{ range .Content }}
-                <div class="card-item" onclick='play("{{.ContextURI}}")'>
-                    <img src="{{(index .Images 0).URL}}" alt="{{.Name}}">
-                    <span>{{.Name}}</span>
-                </div>
-                {{ end }}
-            </div>
-        {{else}}
-            <h2>Connect one device to continue</h2>
-        {{end}}
+        <div class="tabs">
+            <button id="playlists" class='tab-btn active' onclick="openTab('playlists', this)">Playlists</button>
+            <button id="artists" class='tab-btn' onclick="openTab('artists', this)">Artists</button>
+            <button id="albums" class='tab-btn' onclick="openTab('albums', this)">Albums</button>
+        </div>
+        <input hidden id="device-id" value="{{.ActiveDevice.ID}}" />
+
+        <div id="tab-content" class="tab-container">
+            {{ template "tab-content" . }}
+        </div>
+
         <div class="footer">
+            <span id="playback-song">No song playing</span>
+            <input hidden id="pb_state_current_uri" value="" />
+            <input hidden id="pb_state_track_uri" value="" />
+            <input hidden id="pb_state_position_ms" value="" />
             <div class="player-controls">
                 <button onclick="previous()">{{ template "prev" }}</button>
                 <button onclick="togglePlay()">{{ template "play" }}</button>
                 <button onclick="next()">{{ template "next" }}</button>
             </div>
         </div>
+        {{ else }}
+            <h2>Connect one device to continue</h2>
+        {{ end }}
         <button onclick="disconnect()">Disconnect</button>
     </div>
 

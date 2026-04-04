@@ -36,6 +36,7 @@ func main() {
 
 	r.Route("/", func(r chi.Router) {
 		r.Get("/", homeHandler.Home)
+		r.Get("/tab/content", homeHandler.TabContent)
 		r.Get("/login", loginHandler.Login)
 		r.Get("/logout", loginHandler.Logout)
 		r.Get("/login/qr", loginHandler.GetQRCode)
@@ -48,10 +49,14 @@ func main() {
 		r.Get("/spotify/login/status", spotifyLogin.Status)
 	})
 
-	playbackHander := handlers.NewPlaybackHandler(userDB)
+	playbackHander := handlers.NewPlaybackHandler(config, userDB)
 
 	r.Route("/playback", func(r chi.Router) {
 		r.Post("/play", playbackHander.Play)
+		r.Post("/pause", playbackHander.Pause)
+		r.Post("/next", playbackHander.Next)
+		r.Post("/previous", playbackHander.Previous)
+		r.Get("/state", playbackHander.State)
 	})
 
 	fs := http.FileServer(http.Dir("../../website/assets"))

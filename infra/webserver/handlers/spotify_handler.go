@@ -64,7 +64,7 @@ func (h *SpotifyLoginHandler) Callback(w http.ResponseWriter, r *http.Request) {
 
 	h.UserDB.Create(user)
 
-	utils.ExecutarTemplate(w, "callback", nil)
+	utils.ExecutarTemplate(w, "callback.html", nil)
 }
 
 func (h *SpotifyLoginHandler) Status(w http.ResponseWriter, r *http.Request) {

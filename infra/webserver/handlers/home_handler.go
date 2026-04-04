@@ -2,9 +2,11 @@ package handlers
 
 import (
 	"net/http"
+	"strconv"
 
 	"github.com/JacksomGuilherme/Kindle-Spotify-Controller/configs"
 	"github.com/JacksomGuilherme/Kindle-Spotify-Controller/infra/database"
+	"github.com/JacksomGuilherme/Kindle-Spotify-Controller/internal/dao"
 	"github.com/JacksomGuilherme/Kindle-Spotify-Controller/internal/entity"
 	"github.com/JacksomGuilherme/Kindle-Spotify-Controller/internal/services"
 	"github.com/JacksomGuilherme/Kindle-Spotify-Controller/internal/utils"
@@ -23,10 +25,16 @@ func NewHomeHandler(config *configs.Config, userDB database.UserInterface) *Home
 }
 
 func (h *HomeHandler) Home(w http.ResponseWriter, r *http.Request) {
-	tab := r.URL.Query().Get("tab")
-	if tab == "" {
-		tab = "playlists"
+	pageParam := r.URL.Query().Get("page")
+
+	page := 0
+	if pageParam != "" {
+		p, _ := strconv.Atoi(pageParam)
+		page = p
 	}
+
+	limit := 12
+	offset := page * limit
 
 	cookie, _ := utils.LerCookie(r)
 
@@ -41,31 +49,92 @@ func (h *HomeHandler) Home(w http.ResponseWriter, r *http.Request) {
 		return
 	}
 
+	content := getContent("playlists", limit, offset, "", user, h.UserDB, h.Config)
+
 	userDevices, err := services.GetUserDevices(user, h.UserDB, h.Config)
 	if err != nil {
 		w.WriteHeader(http.StatusInternalServerError)
 		return
 	}
-	var content interface{}
 
-	content = getContent(tab, user, h.UserDB, h.Config)
+	var activeDevice *dao.Device
 
-	utils.ExecutarTemplate(w, "home", map[string]interface{}{
-		"Content":         content,
-		"Devices":         userDevices,
-		"DeviceConnected": true,
-		"ActiveTab":       tab,
+	for _, device := range userDevices {
+		if device.IsActive {
+			activeDevice = &device
+			break
+		}
+	}
+
+	if activeDevice == nil && len(userDevices) > 0 {
+		activeDevice = &userDevices[0]
+	}
+
+	utils.ExecutarTemplate(w, "home.html", map[string]interface{}{
+		"Content":         content.Items,
+		"Page":            page,
+		"DisplayPage":     page + 1,
+		"NextCursor":      content.Cursors.After,
+		"HasNext":         content.Next != "",
+		"HasPrevious":     page > 0,
+		"ActiveDevice":    activeDevice,
+		"DeviceConnected": activeDevice != nil,
+		"Tab":             "playlists",
 	})
 }
 
-func getContent(tab string, user *entity.User, userDB database.UserInterface, config *configs.Config) interface{} {
+func (h *HomeHandler) TabContent(w http.ResponseWriter, r *http.Request) {
+	tab := r.URL.Query().Get("tab")
+	if tab == "" {
+		tab = "playlists"
+	}
+
+	pageParam := r.URL.Query().Get("page")
+	after := r.URL.Query().Get("after")
+
+	page := 0
+	if pageParam != "" {
+		p, _ := strconv.Atoi(pageParam)
+		page = p
+	}
+
+	limit := 12
+	offset := page * limit
+
+	cookie, _ := utils.LerCookie(r)
+
+	if cookie["session_id"] == "" {
+		http.Redirect(w, r, "/login", 302)
+		return
+	}
+	user, err := h.UserDB.FindBySpotifyUserId(cookie["session_id"])
+	if user == nil || err != nil {
+		utils.DeletarCookie(w)
+		http.Redirect(w, r, "/login", 302)
+		return
+	}
+
+	content := getContent(tab, limit, offset, after, user, h.UserDB, h.Config)
+
+	utils.ExecutarTemplate(w, "tab-content", map[string]interface{}{
+		"Content":     content.Items,
+		"Page":        page,
+		"DisplayPage": page + 1,
+		"NextCursor":  content.Cursors.After,
+		"HasNext":     content.Next != "" || content.Cursors.After != "",
+		"HasPrevious": page > 0 || tab == "artists",
+		"Tab":         tab,
+	})
+}
+
+func getContent(tab string, limit, offset int, after string, user *entity.User, userDB database.UserInterface, config *configs.Config) *dao.SpotifyAPIResponse {
 	switch tab {
 	case "playlists":
-		return services.GetUserPlaylists(user, userDB, config)
+		return services.GetUserPlaylists(limit, offset, user, userDB, config)
 	case "artists":
-		return services.GetUserFollowedArtists(user, userDB, config)
+		return services.GetUserFollowedArtists(limit, after, user, userDB, config)
 	case "albums":
-		return services.GetUserSavedAlbums(user, userDB, config)
+		return services.GetUserSavedAlbums(limit, offset, user, userDB, config)
 	}
 	return nil
 }
