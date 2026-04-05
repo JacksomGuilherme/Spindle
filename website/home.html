@@ -32,9 +32,13 @@
             </div>
         </div>
         {{ else }}
-            <h2>Connect one device to continue</h2>
+        <div class="disconnected">
+            <h2>Start Spotify</h2>
+            <p class="text-body-secondary">Open Spotify on any device to control with <b>Spindle</b></p>
+        </div>
+         {{ template "polling_device" }}
         {{ end }}
-        <button onclick="disconnect()">Disconnect</button>
+        <button class="btn-disconnect" onclick="disconnect()">Disconnect</button>
     </div>
 
     {{ template "scripts" }}

@@ -1,6 +1,7 @@
 package handlers
 
 import (
+	"encoding/json"
 	"net/http"
 	"strconv"
 
@@ -25,6 +26,20 @@ func NewHomeHandler(config *configs.Config, userDB database.UserInterface) *Home
 }
 
 func (h *HomeHandler) Home(w http.ResponseWriter, r *http.Request) {
+	cookie, _ := utils.LerCookie(r)
+
+	if cookie["session_id"] == "" {
+		http.Redirect(w, r, "/login", 302)
+		return
+	}
+
+	user, err := h.UserDB.FindBySpotifyUserId(cookie["session_id"])
+	if user == nil || err != nil {
+		utils.DeletarCookie(w)
+		http.Redirect(w, r, "/login", 302)
+		return
+	}
+
 	pageParam := r.URL.Query().Get("page")
 
 	page := 0
@@ -35,19 +50,6 @@ func (h *HomeHandler) Home(w http.ResponseWriter, r *http.Request) {
 
 	limit := 12
 	offset := page * limit
-
-	cookie, _ := utils.LerCookie(r)
-
-	if cookie["session_id"] == "" {
-		http.Redirect(w, r, "/login", 302)
-		return
-	}
-	user, err := h.UserDB.FindBySpotifyUserId(cookie["session_id"])
-	if user == nil || err != nil {
-		utils.DeletarCookie(w)
-		http.Redirect(w, r, "/login", 302)
-		return
-	}
 
 	content := getContent("playlists", limit, offset, "", user, h.UserDB, h.Config)
 
@@ -84,6 +86,19 @@ func (h *HomeHandler) Home(w http.ResponseWriter, r *http.Request) {
 }
 
 func (h *HomeHandler) TabContent(w http.ResponseWriter, r *http.Request) {
+	cookie, _ := utils.LerCookie(r)
+
+	if cookie["session_id"] == "" {
+		http.Redirect(w, r, "/login", 302)
+		return
+	}
+	user, err := h.UserDB.FindBySpotifyUserId(cookie["session_id"])
+	if user == nil || err != nil {
+		utils.DeletarCookie(w)
+		http.Redirect(w, r, "/login", 302)
+		return
+	}
+
 	tab := r.URL.Query().Get("tab")
 	if tab == "" {
 		tab = "playlists"
@@ -101,19 +116,6 @@ func (h *HomeHandler) TabContent(w http.ResponseWriter, r *http.Request) {
 	limit := 12
 	offset := page * limit
 
-	cookie, _ := utils.LerCookie(r)
-
-	if cookie["session_id"] == "" {
-		http.Redirect(w, r, "/login", 302)
-		return
-	}
-	user, err := h.UserDB.FindBySpotifyUserId(cookie["session_id"])
-	if user == nil || err != nil {
-		utils.DeletarCookie(w)
-		http.Redirect(w, r, "/login", 302)
-		return
-	}
-
 	content := getContent(tab, limit, offset, after, user, h.UserDB, h.Config)
 
 	utils.ExecutarTemplate(w, "tab-content", map[string]interface{}{
@@ -125,6 +127,38 @@ func (h *HomeHandler) TabContent(w http.ResponseWriter, r *http.Request) {
 		"HasPrevious": page > 0 || tab == "artists",
 		"Tab":         tab,
 	})
+}
+
+func (h *HomeHandler) ActiveDevice(w http.ResponseWriter, r *http.Request) {
+	cookie, _ := utils.LerCookie(r)
+
+	user, err := h.UserDB.FindBySpotifyUserId(cookie["session_id"])
+	if user == nil || err != nil {
+		utils.DeletarCookie(w)
+		http.Redirect(w, r, "/login", 302)
+		return
+	}
+
+	userDevices, err := services.GetUserDevices(user, h.UserDB, h.Config)
+	if err != nil {
+		w.WriteHeader(http.StatusInternalServerError)
+		return
+	}
+
+	var activeDevice *dao.Device
+
+	for _, device := range userDevices {
+		if device.IsActive {
+			activeDevice = &device
+			break
+		}
+	}
+
+	if activeDevice == nil && len(userDevices) > 0 {
+		activeDevice = &userDevices[0]
+	}
+
+	json.NewEncoder(w).Encode(activeDevice)
 }
 
 func getContent(tab string, limit, offset int, after string, user *entity.User, userDB database.UserInterface, config *configs.Config) *dao.SpotifyAPIResponse {

@@ -9,6 +9,7 @@ type Pairing struct {
 	Authenticated bool
 	UserID        string
 	ExpiresAt     time.Time
+	Consumed      bool
 }
 
 type PairingStore struct {
@@ -47,6 +48,35 @@ func (s *PairingStore) Get(id string) (*Pairing, bool) {
 	return p, ok
 }
 
+func (s *PairingStore) IsValid(id string) bool {
+	s.mu.RLock()
+	defer s.mu.RUnlock()
+
+	p, ok := s.pairings[id]
+	if !ok {
+		return false
+	}
+
+	if p.Consumed {
+		return false
+	}
+
+	if time.Now().After(p.ExpiresAt) {
+		return false
+	}
+
+	return true
+}
+
+func (s *PairingStore) Consume(id string) {
+	s.mu.Lock()
+	defer s.mu.Unlock()
+
+	if p, ok := s.pairings[id]; ok {
+		p.Consumed = true
+	}
+}
+
 func (s *PairingStore) Authenticate(id string, userID string) {
 	s.mu.Lock()
 	defer s.mu.Unlock()
@@ -63,7 +93,7 @@ func (s *PairingStore) Cleanup() {
 
 		s.mu.Lock()
 		for id, p := range s.pairings {
-			if time.Now().After(p.ExpiresAt) {
+			if p.Consumed || time.Now().After(p.ExpiresAt) {
 				delete(s.pairings, id)
 			}
 		}

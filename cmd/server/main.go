@@ -37,6 +37,7 @@ func main() {
 	r.Route("/", func(r chi.Router) {
 		r.Get("/", homeHandler.Home)
 		r.Get("/tab/content", homeHandler.TabContent)
+		r.Get("/device", homeHandler.ActiveDevice)
 		r.Get("/login", loginHandler.Login)
 		r.Get("/logout", loginHandler.Logout)
 		r.Get("/login/qr", loginHandler.GetQRCode)

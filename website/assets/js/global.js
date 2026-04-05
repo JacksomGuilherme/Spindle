@@ -104,10 +104,9 @@ function play(contextURI) {
             'Content-Type': 'application/json',
         },
         body: JSON.stringify(reqBody)
+    }).then(function (res) {
+        setTimeout(refreshPlaybackState, 1000)
     })
-        .then(function (res) {
-            setTimeout(refreshPlaybackSatate, 800)
-        })
 }
 
 isPlaying = false
@@ -122,19 +121,19 @@ function togglePlay() {
             }
         })
             .then(function (res) {
-                setTimeout(refreshPlaybackSatate, 800)
+                setTimeout(refreshPlaybackState, 1000)
             })
     } else {
+        let reqBody = parsePlaybackState()
         fetch(`/playback/play?device_id=${deviceId}`, {
             method: 'POST',
             headers: {
                 'Content-Type': 'application/json',
             },
-            body: JSON.stringify(parsePlaybackState())
+            body: JSON.stringify(reqBody)
+        }).then(function (res) {
+            setTimeout(refreshPlaybackState, 1000)
         })
-            .then(function (res) {
-                setTimeout(refreshPlaybackSatate, 800)
-            })
     }
 }
 
@@ -147,7 +146,7 @@ function next() {
         }
     })
         .then(function (res) {
-            setTimeout(refreshPlaybackSatate, 800)
+            setTimeout(refreshPlaybackState, 1000)
         })
 }
 
@@ -160,7 +159,7 @@ function previous() {
         }
     })
         .then(function (res) {
-            setTimeout(refreshPlaybackSatate, 800)
+            setTimeout(refreshPlaybackState, 1000)
         })
 }
 
@@ -181,16 +180,39 @@ function disconnect() {
     window.location = "/logout"
 }
 
-function refreshPlaybackSatate() {
+let currentUri = ""
+let currentPlaying = null
+
+function refreshPlaybackState(attempt = 0) {
+    const MAX_ATTEMPTS = 5
+
     fetch('/playback/state')
-        .then(function (res) { return res.json() })
-        .then(function (data) {
+        .then(res => res.json())
+        .then(data => {
+            if (!data || !data.item) return
+
+            const newUri = data.item.uri
+            const newPlaying = data.is_playing
+
+            const changed =
+                currentUri !== newUri ||
+                currentPlaying !== newPlaying
+
             updateUI(data)
+
+            currentUri = newUri
+            currentPlaying = newPlaying
+
+            if (!changed && attempt < MAX_ATTEMPTS) {
+                setTimeout(() => {
+                    refreshPlaybackState(attempt + 1)
+                }, 800)
+            }
         })
 }
 
 window.onload = function () {
-    refreshPlaybackSatate()
+    refreshPlaybackState()
 }
 
 function parsePlaybackState() {

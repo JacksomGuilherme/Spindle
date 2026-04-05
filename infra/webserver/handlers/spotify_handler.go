@@ -45,26 +45,50 @@ func (h *SpotifyLoginHandler) Callback(w http.ResponseWriter, r *http.Request) {
 	code := r.URL.Query().Get("code")
 	state := r.URL.Query().Get("state")
 
-	if state == "" {
-		http.Redirect(w, r, "/?error=state_mismatch", http.StatusFound)
+	if code == "" {
+		utils.ExecutarTemplate(w, "callback.html", map[string]interface{}{
+			"Error": "Missing code",
+		})
+		return
+	}
+
+	if state == "" || !h.PairingStore.IsValid(state) {
+		utils.ExecutarTemplate(w, "callback.html", map[string]interface{}{
+			"Error": "Invalid or expired session",
+		})
 		return
 	}
 
 	token, err := utils.ExchangeCodeForToken(code, h.Config)
 	if err != nil {
-		w.WriteHeader(http.StatusBadRequest)
+		utils.ExecutarTemplate(w, "callback.html", map[string]interface{}{
+			"Error": "Failed to authenticate with Spotify",
+		})
 		return
 	}
 
-	userID, _ := getSpotifyUser(token.AccessToken)
+	userID, err := getSpotifyUser(token.AccessToken)
+	if err != nil || userID == "" {
+		utils.ExecutarTemplate(w, "callback.html", map[string]interface{}{
+			"Error": "Spotify user not found",
+		})
+		return
+	}
+
 	h.PairingStore.Authenticate(state, userID)
+	h.PairingStore.Consume(state)
 
 	expiresAt := time.Now().Add(time.Duration(token.ExpiresIn) * time.Second)
 	user := entity.NewUser(userID, token.AccessToken, token.RefreshToken, expiresAt)
 
-	h.UserDB.Create(user)
+	existingUser, _ := h.UserDB.FindBySpotifyUserId(userID)
+	if existingUser == nil {
+		h.UserDB.Create(user)
+	}
 
-	utils.ExecutarTemplate(w, "callback.html", nil)
+	utils.ExecutarTemplate(w, "callback.html", map[string]interface{}{
+		"Success": true,
+	})
 }
 
 func (h *SpotifyLoginHandler) Status(w http.ResponseWriter, r *http.Request) {

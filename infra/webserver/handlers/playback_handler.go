@@ -51,12 +51,13 @@ func (h *PlaybackHandler) Play(w http.ResponseWriter, r *http.Request) {
 }
 
 func (h *PlaybackHandler) Pause(w http.ResponseWriter, r *http.Request) {
-	deviceID := r.URL.Query().Get("device_id")
 	cookie, _ := utils.LerCookie(r)
 	if cookie["session_id"] == "" {
 		http.Redirect(w, r, "/login", 302)
 		return
 	}
+
+	deviceID := r.URL.Query().Get("device_id")
 
 	err := services.PausePlayback(deviceID, cookie["session_id"], h.UserDB)
 	if err != nil {
@@ -75,12 +76,14 @@ func (h *PlaybackHandler) Pause(w http.ResponseWriter, r *http.Request) {
 }
 
 func (h *PlaybackHandler) Next(w http.ResponseWriter, r *http.Request) {
-	deviceID := r.URL.Query().Get("device_id")
 	cookie, _ := utils.LerCookie(r)
+
 	if cookie["session_id"] == "" {
 		http.Redirect(w, r, "/login", 302)
 		return
 	}
+
+	deviceID := r.URL.Query().Get("device_id")
 
 	err := services.SkipToNextSong(deviceID, cookie["session_id"], h.UserDB)
 	if err != nil {
@@ -99,12 +102,13 @@ func (h *PlaybackHandler) Next(w http.ResponseWriter, r *http.Request) {
 }
 
 func (h *PlaybackHandler) Previous(w http.ResponseWriter, r *http.Request) {
-	deviceID := r.URL.Query().Get("device_id")
 	cookie, _ := utils.LerCookie(r)
 	if cookie["session_id"] == "" {
 		http.Redirect(w, r, "/login", 302)
 		return
 	}
+
+	deviceID := r.URL.Query().Get("device_id")
 
 	err := services.SkipToPreviousSong(deviceID, cookie["session_id"], h.UserDB)
 	if err != nil {
@@ -124,6 +128,7 @@ func (h *PlaybackHandler) Previous(w http.ResponseWriter, r *http.Request) {
 
 func (h *PlaybackHandler) State(w http.ResponseWriter, r *http.Request) {
 	cookie, _ := utils.LerCookie(r)
+
 	if cookie["session_id"] == "" {
 		http.Redirect(w, r, "/login", 302)
 		return
