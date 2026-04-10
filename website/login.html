@@ -2,31 +2,45 @@
 <html>
 
 <head>
-    {{ template "head" }}
-    <title>Spindle - Login</title>
+  {{ template "head" }}
+  <link href="/assets/css/login.css" rel="stylesheet">
+  <title>Spindle - Login</title>
 </head>
 
 
 <body>
 
   <div class="container">
-    <h1>Spindle</h1>
-    <p>Scan the QR code with your phone to connect Spotify</p>
+    <div class="masthead">
+      <span class="wordmark">Spindle</span>
+      <p class="tagline">Spotify for Kindle</p>
+    </div>
 
     <div class="login-card">
-      <div class="qr">
-        <img src="/login/qr?pairing_id={{.PairingID}}" />
+      <!-- Corner ticks on the QR border are handled inside .qr-border -->
+
+      <div class="qr-wrapper">
+        <div class="qr-border">
+          <span></span><span></span><span></span><span></span>
+          <img src="/login/qr?pairing_id={{.PairingID}}" alt="QR Code" />
+        </div>
       </div>
-      <div class="d-grid gap-0 row-gap-1 text-sm text-muted">
-        <p>1. Scan the QR code with your phone</p>
-        <p>2. Log in to Spotify on your phone</p>
-        <p>3. Return here when done</p>
-      </div>
-      <hr>
-      <a target="_blank" href="{{.AuthUrl}}">Or authorize here</a>
+
+      <p class="section-label">instructions</p>
+
+      <ul class="steps">
+        <li><span class="step-num">I.</span> Scan the QR code with your phone</li>
+        <li><span class="step-num">II.</span> Log in to Spotify on your phone</li>
+        <li><span class="step-num">III.</span> Return here when done</li>
+      </ul>
+
+      <div class="divider"><span>or</span></div>
+
+      <a class="auth-link" target="_blank" href="{{.AuthUrl}}">Authorize Manually</a>
     </div>
   </div>
 
+  {{ template "footer" }}
   <script>
     const pairingId = "{{.PairingID}}";
 

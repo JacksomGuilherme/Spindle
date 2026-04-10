@@ -45,7 +45,7 @@ func GetUserFollowedArtists(limit int, after string, user *entity.User, userDB d
 	if after != "" {
 		url += "&after=" + after
 	}
-	fmt.Println(url)
+
 	req, err := http.NewRequest("GET", url, nil)
 	if err != nil {
 		return nil

@@ -21,7 +21,10 @@
         </div>
 
         <div class="footer">
-            <span id="playback-song">No song playing</span>
+            <div class="current-playing">
+                <strong id="playback-song">No song playing</strong>
+                <span class="text-muted" id="playback-artist">...</span>
+            </div>
             <input hidden id="pb_state_current_uri" value="" />
             <input hidden id="pb_state_track_uri" value="" />
             <input hidden id="pb_state_position_ms" value="" />
@@ -34,7 +37,7 @@
         {{ else }}
         <div class="disconnected">
             <h2>Start Spotify</h2>
-            <p class="text-body-secondary">Open Spotify on any device to control with <b>Spindle</b></p>
+            <p class="text-muted">Open Spotify on any device to control with <b>Spindle</b></p>
         </div>
          {{ template "polling_device" }}
         {{ end }}

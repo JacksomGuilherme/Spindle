@@ -234,6 +234,7 @@ function parsePlaybackState() {
 function updateUI(data) {
     if (!data || !data.item) {
         document.getElementById("playback-song").innerText = "No song playing"
+        document.getElementById("playback-artist").innerText = "..."
         document.getElementById("pb_state_current_uri").value = ""
         document.getElementById("pb_state_track_uri").value = ""
         document.getElementById("pb_state_position_ms").value = ""
@@ -241,8 +242,10 @@ function updateUI(data) {
     }
 
     if (data.item.artists && data.item.name) {
-        var song = data.item.artists[0].name + " - " + data.item.name
-        document.getElementById("playback-song").innerText = song
+        let artistNames = data.item.artists.map(artist => artist.name).join(", ")
+        console.log(data.item.artists)
+        document.getElementById("playback-song").innerText = data.item.name
+        document.getElementById("playback-artist").innerText = artistNames
     }
     document.getElementById("pb_state_current_uri").value = data.context.uri
     document.getElementById("pb_state_track_uri").value = data.item.uri

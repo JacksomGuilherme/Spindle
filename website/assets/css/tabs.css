@@ -1,15 +1,15 @@
 .tabs {
   display: flex;
   width: 100%;
-  margin-bottom: 15px;
+  margin-bottom: 8px;
 }
 
 .tab-btn {
   flex: 1;
-  padding: 10px;
+  padding: 6px;
   border: 1px solid black;
   background: var(--bg-color);
-  font-size: 14px;
+  font-size: 12px;
 }
 
 .tab-btn:first-child {
@@ -34,14 +34,16 @@
 .tab-container {
   width: 100%;
 }
- 
+
 .tab-content {
   display: grid;
   grid-template-columns: repeat(3, 1fr);
   grid-template-rows: repeat(4, 1fr);
   gap: 8px;
   width: 100%;
+  height: calc(4 * 60px + 3 * 8px);
   overflow-y: hidden;
+  align-items: stretch;
 }
 
 .pagination {
@@ -49,7 +51,10 @@
   justify-content: center;
   align-items: center;
   gap: 10px;
-  margin-top: 10px;
+  margin-top: 20px;
+  padding: 10px;
+
+  border-bottom: 1px solid black;
 }
 
 .pagination button {
