@@ -5,6 +5,7 @@ import (
 	"encoding/json"
 	"fmt"
 	"net/http"
+	"strconv"
 
 	"github.com/JacksomGuilherme/Kindle-Spotify-Controller/configs"
 	"github.com/JacksomGuilherme/Kindle-Spotify-Controller/infra/database"
@@ -173,7 +174,8 @@ func PlayContext(playRequest dao.PlaybackRequest, deviceID, sessionID string, us
 		return err
 	}
 
-	user, err := userDB.FindBySpotifyUserId(sessionID)
+	id, _ := strconv.Atoi(sessionID)
+	user, err := userDB.FindBySessionId(id)
 	if err != nil {
 		return err
 	}
@@ -198,7 +200,8 @@ func PausePlayback(deviceID, sessionID string, userDB database.UserInterface) er
 		return err
 	}
 
-	user, err := userDB.FindBySpotifyUserId(sessionID)
+	id, _ := strconv.Atoi(sessionID)
+	user, err := userDB.FindBySessionId(id)
 	if err != nil {
 		return err
 	}
@@ -222,7 +225,8 @@ func SkipToNextSong(deviceID, sessionID string, userDB database.UserInterface) e
 		return err
 	}
 
-	user, err := userDB.FindBySpotifyUserId(sessionID)
+	id, _ := strconv.Atoi(sessionID)
+	user, err := userDB.FindBySessionId(id)
 	if err != nil {
 		return err
 	}
@@ -246,7 +250,8 @@ func SkipToPreviousSong(deviceID, sessionID string, userDB database.UserInterfac
 		return err
 	}
 
-	user, err := userDB.FindBySpotifyUserId(sessionID)
+	id, _ := strconv.Atoi(sessionID)
+	user, err := userDB.FindBySessionId(id)
 	if err != nil {
 		return err
 	}

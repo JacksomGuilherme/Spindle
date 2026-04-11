@@ -33,7 +33,8 @@ func (h *HomeHandler) Home(w http.ResponseWriter, r *http.Request) {
 		return
 	}
 
-	user, err := h.UserDB.FindBySpotifyUserId(cookie["session_id"])
+	id, _ := strconv.Atoi(cookie["session_id"])
+	user, err := h.UserDB.FindBySessionId(id)
 	if user == nil || err != nil {
 		utils.DeletarCookie(w)
 		http.Redirect(w, r, "/login", 302)
@@ -92,7 +93,9 @@ func (h *HomeHandler) TabContent(w http.ResponseWriter, r *http.Request) {
 		http.Redirect(w, r, "/login", 302)
 		return
 	}
-	user, err := h.UserDB.FindBySpotifyUserId(cookie["session_id"])
+
+	id, _ := strconv.Atoi(cookie["session_id"])
+	user, err := h.UserDB.FindBySessionId(id)
 	if user == nil || err != nil {
 		utils.DeletarCookie(w)
 		http.Redirect(w, r, "/login", 302)
@@ -132,7 +135,8 @@ func (h *HomeHandler) TabContent(w http.ResponseWriter, r *http.Request) {
 func (h *HomeHandler) ActiveDevice(w http.ResponseWriter, r *http.Request) {
 	cookie, _ := utils.LerCookie(r)
 
-	user, err := h.UserDB.FindBySpotifyUserId(cookie["session_id"])
+	id, _ := strconv.Atoi(cookie["session_id"])
+	user, err := h.UserDB.FindBySessionId(id)
 	if user == nil || err != nil {
 		utils.DeletarCookie(w)
 		http.Redirect(w, r, "/login", 302)

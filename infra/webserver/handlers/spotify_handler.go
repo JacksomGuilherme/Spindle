@@ -4,6 +4,7 @@ import (
 	"encoding/json"
 	"fmt"
 	"net/http"
+	"strconv"
 	"time"
 
 	"github.com/JacksomGuilherme/Kindle-Spotify-Controller/configs"
@@ -81,10 +82,7 @@ func (h *SpotifyLoginHandler) Callback(w http.ResponseWriter, r *http.Request) {
 	expiresAt := time.Now().Add(time.Duration(token.ExpiresIn) * time.Second)
 	user := entity.NewUser(userID, token.AccessToken, token.RefreshToken, expiresAt)
 
-	existingUser, _ := h.UserDB.FindBySpotifyUserId(userID)
-	if existingUser == nil {
-		h.UserDB.Create(user)
-	}
+	h.UserDB.Create(user)
 
 	utils.ExecutarTemplate(w, "callback.html", map[string]interface{}{
 		"Success": true,
@@ -101,7 +99,13 @@ func (h *SpotifyLoginHandler) Status(w http.ResponseWriter, r *http.Request) {
 	}
 
 	if p.Authenticated {
-		err := utils.SalvarCookie(w, p.UserID)
+		user, err := h.UserDB.FindBySpotifyUserId(p.UserID)
+		if err != nil {
+			w.WriteHeader(http.StatusInternalServerError)
+			return
+		}
+
+		err = utils.SalvarCookie(w, strconv.Itoa(user.ID))
 		if err != nil {
 			w.WriteHeader(http.StatusBadRequest)
 			return

@@ -36,7 +36,6 @@
   object-fit: cover;
   object-position: center;
   flex-shrink: 0;
-  filter: grayscale(1) contrast(0.7);
 }
 
 .card-item span {

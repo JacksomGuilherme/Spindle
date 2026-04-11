@@ -3,6 +3,7 @@ package handlers
 import (
 	"fmt"
 	"net/http"
+	"strconv"
 
 	"github.com/JacksomGuilherme/Kindle-Spotify-Controller/configs"
 	"github.com/JacksomGuilherme/Kindle-Spotify-Controller/infra/database"
@@ -39,9 +40,11 @@ func (h *LoginHandler) Login(w http.ResponseWriter, r *http.Request) {
 
 func (h *LoginHandler) Logout(w http.ResponseWriter, r *http.Request) {
 	cookie, _ := utils.LerCookie(r)
-	userID := cookie["session_id"]
+	sessionID := cookie["session_id"]
 	utils.DeletarCookie(w)
-	h.UserDB.Delete(userID)
+
+	id, _ := strconv.Atoi(sessionID)
+	h.UserDB.Delete(id)
 	http.Redirect(w, r, "/login", 302)
 }
 

@@ -3,6 +3,7 @@ package handlers
 import (
 	"encoding/json"
 	"net/http"
+	"strconv"
 
 	"github.com/JacksomGuilherme/Kindle-Spotify-Controller/configs"
 	"github.com/JacksomGuilherme/Kindle-Spotify-Controller/infra/database"
@@ -40,7 +41,8 @@ func (h *PlaybackHandler) Play(w http.ResponseWriter, r *http.Request) {
 		return
 	}
 
-	user, err := h.UserDB.FindBySpotifyUserId(cookie["session_id"])
+	id, _ := strconv.Atoi(cookie["session_id"])
+	user, err := h.UserDB.FindBySessionId(id)
 	if user == nil || err != nil {
 		utils.DeletarCookie(w)
 		http.Redirect(w, r, "/login", 302)
@@ -65,7 +67,8 @@ func (h *PlaybackHandler) Pause(w http.ResponseWriter, r *http.Request) {
 		return
 	}
 
-	user, err := h.UserDB.FindBySpotifyUserId(cookie["session_id"])
+	id, _ := strconv.Atoi(cookie["session_id"])
+	user, err := h.UserDB.FindBySessionId(id)
 	if user == nil || err != nil {
 		utils.DeletarCookie(w)
 		http.Redirect(w, r, "/login", 302)
@@ -91,7 +94,8 @@ func (h *PlaybackHandler) Next(w http.ResponseWriter, r *http.Request) {
 		return
 	}
 
-	user, err := h.UserDB.FindBySpotifyUserId(cookie["session_id"])
+	id, _ := strconv.Atoi(cookie["session_id"])
+	user, err := h.UserDB.FindBySessionId(id)
 	if user == nil || err != nil {
 		utils.DeletarCookie(w)
 		http.Redirect(w, r, "/login", 302)
@@ -116,7 +120,8 @@ func (h *PlaybackHandler) Previous(w http.ResponseWriter, r *http.Request) {
 		return
 	}
 
-	user, err := h.UserDB.FindBySpotifyUserId(cookie["session_id"])
+	id, _ := strconv.Atoi(cookie["session_id"])
+	user, err := h.UserDB.FindBySessionId(id)
 	if user == nil || err != nil {
 		utils.DeletarCookie(w)
 		http.Redirect(w, r, "/login", 302)
@@ -134,7 +139,8 @@ func (h *PlaybackHandler) State(w http.ResponseWriter, r *http.Request) {
 		return
 	}
 
-	user, err := h.UserDB.FindBySpotifyUserId(cookie["session_id"])
+	id, _ := strconv.Atoi(cookie["session_id"])
+	user, err := h.UserDB.FindBySessionId(id)
 	if user == nil || err != nil {
 		utils.DeletarCookie(w)
 		http.Redirect(w, r, "/login", 302)
