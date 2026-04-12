@@ -41,14 +41,6 @@ func (h *PlaybackHandler) Play(w http.ResponseWriter, r *http.Request) {
 		return
 	}
 
-	id, _ := strconv.Atoi(cookie["session_id"])
-	user, err := h.UserDB.FindBySessionId(id)
-	if user == nil || err != nil {
-		utils.DeletarCookie(w)
-		http.Redirect(w, r, "/login", 302)
-		return
-	}
-
 	w.WriteHeader(http.StatusOK)
 }
 
@@ -64,14 +56,6 @@ func (h *PlaybackHandler) Pause(w http.ResponseWriter, r *http.Request) {
 	err := services.PausePlayback(deviceID, cookie["session_id"], h.UserDB, h.Config)
 	if err != nil {
 		w.WriteHeader(http.StatusInternalServerError)
-		return
-	}
-
-	id, _ := strconv.Atoi(cookie["session_id"])
-	user, err := h.UserDB.FindBySessionId(id)
-	if user == nil || err != nil {
-		utils.DeletarCookie(w)
-		http.Redirect(w, r, "/login", 302)
 		return
 	}
 
@@ -94,14 +78,6 @@ func (h *PlaybackHandler) Next(w http.ResponseWriter, r *http.Request) {
 		return
 	}
 
-	id, _ := strconv.Atoi(cookie["session_id"])
-	user, err := h.UserDB.FindBySessionId(id)
-	if user == nil || err != nil {
-		utils.DeletarCookie(w)
-		http.Redirect(w, r, "/login", 302)
-		return
-	}
-
 	w.WriteHeader(http.StatusOK)
 }
 
@@ -117,14 +93,6 @@ func (h *PlaybackHandler) Previous(w http.ResponseWriter, r *http.Request) {
 	err := services.SkipToPreviousSong(deviceID, cookie["session_id"], h.UserDB, h.Config)
 	if err != nil {
 		w.WriteHeader(http.StatusInternalServerError)
-		return
-	}
-
-	id, _ := strconv.Atoi(cookie["session_id"])
-	user, err := h.UserDB.FindBySessionId(id)
-	if user == nil || err != nil {
-		utils.DeletarCookie(w)
-		http.Redirect(w, r, "/login", 302)
 		return
 	}
 
