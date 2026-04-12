@@ -206,7 +206,7 @@ function refreshPlaybackState(attempt = 0) {
             if (!changed && attempt < MAX_ATTEMPTS) {
                 setTimeout(() => {
                     refreshPlaybackState(attempt + 1)
-                }, 800)
+                }, 1200)
             }
         })
 }

@@ -20,7 +20,7 @@
             {{ template "tab-content" . }}
         </div>
 
-        <div class="footer">
+        <div class="pb-container">
             <div class="current-playing">
                 <strong id="playback-song">No song playing</strong>
                 <span class="text-muted" id="playback-artist">...</span>
@@ -41,7 +41,9 @@
         </div>
          {{ template "polling_device" }}
         {{ end }}
-        <button class="btn-disconnect" onclick="disconnect()">Disconnect</button>
+        <div class="footer">
+            <button class="btn-disconnect" onclick="disconnect()">Disconnect</button>
+        </div>
     </div>
 
     {{ template "scripts" }}

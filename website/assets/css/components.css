@@ -26,7 +26,6 @@
   overflow: hidden;
   user-select: none;
   -webkit-user-select: none;
-  transition: 0.2s;
 }
 
 .card-item img {
@@ -56,7 +55,7 @@
   color: white;
 }
 
-.footer {
+.pb-container {
   display: flex;
   align-items: center;
   flex: 1;
@@ -94,7 +93,6 @@
   border-radius: var(--border-radius);
   background: var(--bg-color);
   color: black;
-  transition: 0.2s;
 }
 
 .btn-disconnect:active {
@@ -140,4 +138,11 @@
 
 .text-muted {
   color: #6c757d !important
+}
+
+.footer {
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  width: 100%;
 }
