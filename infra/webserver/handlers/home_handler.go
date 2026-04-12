@@ -124,6 +124,10 @@ func (h *HomeHandler) TabContent(w http.ResponseWriter, r *http.Request) {
 	offset := page * limit
 
 	content := getContent(tab, limit, offset, after, user, h.UserDB, h.Config)
+	if content == nil {
+		w.WriteHeader(http.StatusBadRequest)
+		return
+	}
 
 	utils.ExecutarTemplate(w, "tab-content", map[string]interface{}{
 		"Content":     content.Items,
