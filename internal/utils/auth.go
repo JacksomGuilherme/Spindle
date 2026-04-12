@@ -83,7 +83,10 @@ func refreshAccessToken(refreshToken string, config *configs.Config) (*dao.Token
 	data.Set("grant_type", "refresh_token")
 	data.Set("refresh_token", refreshToken)
 
-	req, _ := http.NewRequest("POST", "https://accounts.spotify.com/api/token", strings.NewReader(data.Encode()))
+	req, err := http.NewRequest("POST", "https://accounts.spotify.com/api/token", strings.NewReader(data.Encode()))
+	if err != nil {
+		return nil, err
+	}
 	req.SetBasicAuth(config.AppClientID, config.AppClientSecret)
 	req.Header.Set("Content-Type", "application/x-www-form-urlencoded")
 
