@@ -17,6 +17,7 @@ type Config struct {
 	Dns             string `mapstructure:"DNS"`
 	HashKey         string `mapstructure:"HASH_KEY"`
 	BlockKey        string `mapstructure:"BLOCK_KEY"`
+	EncryptionKey   string `mapstructure:"ENCRYPTION_KEY"`
 }
 
 func LoadConfig(path string) *Config {

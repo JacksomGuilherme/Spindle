@@ -45,21 +45,36 @@ func ExchangeCodeForToken(code string, config *configs.Config) (*dao.TokenRespon
 }
 
 func GetValidAccessToken(user *entity.User, userDB database.UserInterface, config *configs.Config) (string, error) {
-	if time.Now().Before(user.ExpiresAt) {
-		return user.AccessToken, nil
-	}
-
-	token, err := refreshAccessToken(user.RefreshToken, config)
+	accessToken, err := Decrypt(user.AccessToken, config.EncryptionKey)
 	if err != nil {
 		return "", err
 	}
 
-	user.AccessToken = token.AccessToken
+	if time.Now().Before(user.ExpiresAt) {
+		return accessToken, nil
+	}
+
+	refreshToken, err := Decrypt(user.RefreshToken, config.EncryptionKey)
+	if err != nil {
+		return "", err
+	}
+
+	token, err := refreshAccessToken(refreshToken, config)
+	if err != nil {
+		return "", err
+	}
+
+	encryptedAccess, _ := Encrypt(token.AccessToken, config.EncryptionKey)
+	user.AccessToken = encryptedAccess
 	user.ExpiresAt = time.Now().Add(time.Duration(token.ExpiresIn) * time.Second)
 
-	userDB.Update(user)
+	if token.RefreshToken != "" {
+		encryptedRefresh, _ := Encrypt(token.RefreshToken, config.EncryptionKey)
+		user.RefreshToken = encryptedRefresh
+	}
 
-	return user.AccessToken, nil
+	userDB.Update(user)
+	return token.AccessToken, nil
 }
 
 func refreshAccessToken(refreshToken string, config *configs.Config) (*dao.TokenResponse, error) {

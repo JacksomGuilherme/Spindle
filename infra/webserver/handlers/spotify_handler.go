@@ -80,7 +80,10 @@ func (h *SpotifyLoginHandler) Callback(w http.ResponseWriter, r *http.Request) {
 	h.PairingStore.Consume(state)
 
 	expiresAt := time.Now().Add(time.Duration(token.ExpiresIn) * time.Second)
-	user := entity.NewUser(userID, token.AccessToken, token.RefreshToken, expiresAt)
+	encryptedAccess, _ := utils.Encrypt(token.AccessToken, h.Config.EncryptionKey)
+	encryptedRefresh, _ := utils.Encrypt(token.RefreshToken, h.Config.EncryptionKey)
+
+	user := entity.NewUser(userID, encryptedAccess, encryptedRefresh, expiresAt)
 
 	h.UserDB.Create(user)
 

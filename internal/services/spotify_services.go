@@ -22,6 +22,7 @@ func GetUserPlaylists(limit, offset int, user *entity.User, userDB database.User
 	}
 	accessToken, err := utils.GetValidAccessToken(user, userDB, config)
 	if err != nil {
+		fmt.Println(err)
 		return nil
 	}
 
@@ -29,6 +30,7 @@ func GetUserPlaylists(limit, offset int, user *entity.User, userDB database.User
 
 	resp, err := http.DefaultClient.Do(req)
 	if err != nil {
+		fmt.Println(err)
 		return nil
 	}
 	defer resp.Body.Close()
@@ -161,7 +163,7 @@ func GetCurrentPlayingSong(user *entity.User, userDB database.UserInterface, con
 	return &apiResponse, nil
 }
 
-func PlayContext(playRequest dao.PlaybackRequest, deviceID, sessionID string, userDB database.UserInterface) error {
+func PlayContext(playRequest dao.PlaybackRequest, deviceID, sessionID string, userDB database.UserInterface, config *configs.Config) error {
 	bodyBytes, err := json.Marshal(playRequest)
 	if err != nil {
 		return err
@@ -180,8 +182,10 @@ func PlayContext(playRequest dao.PlaybackRequest, deviceID, sessionID string, us
 		return err
 	}
 
+	accessToken, err := utils.GetValidAccessToken(user, userDB, config)
+
 	req.Header.Set("Content-Type", "application/json")
-	req.Header.Set("Authorization", "Bearer "+user.AccessToken)
+	req.Header.Set("Authorization", "Bearer "+accessToken)
 
 	client := &http.Client{}
 	_, err = client.Do(req)
@@ -192,7 +196,7 @@ func PlayContext(playRequest dao.PlaybackRequest, deviceID, sessionID string, us
 	return nil
 }
 
-func PausePlayback(deviceID, sessionID string, userDB database.UserInterface) error {
+func PausePlayback(deviceID, sessionID string, userDB database.UserInterface, config *configs.Config) error {
 	url := fmt.Sprintf("https://api.spotify.com/v1/me/player/pause?device_id=%s", deviceID)
 
 	req, err := http.NewRequest("PUT", url, nil)
@@ -206,8 +210,10 @@ func PausePlayback(deviceID, sessionID string, userDB database.UserInterface) er
 		return err
 	}
 
+	accessToken, err := utils.GetValidAccessToken(user, userDB, config)
+
 	req.Header.Set("Content-Type", "application/json")
-	req.Header.Set("Authorization", "Bearer "+user.AccessToken)
+	req.Header.Set("Authorization", "Bearer "+accessToken)
 
 	client := &http.Client{}
 	_, err = client.Do(req)
@@ -217,7 +223,7 @@ func PausePlayback(deviceID, sessionID string, userDB database.UserInterface) er
 	return nil
 }
 
-func SkipToNextSong(deviceID, sessionID string, userDB database.UserInterface) error {
+func SkipToNextSong(deviceID, sessionID string, userDB database.UserInterface, config *configs.Config) error {
 	url := fmt.Sprintf("https://api.spotify.com/v1/me/player/next?device_id=%s", deviceID)
 
 	req, err := http.NewRequest("POST", url, nil)
@@ -231,8 +237,10 @@ func SkipToNextSong(deviceID, sessionID string, userDB database.UserInterface) e
 		return err
 	}
 
+	accessToken, err := utils.GetValidAccessToken(user, userDB, config)
+
 	req.Header.Set("Content-Type", "application/json")
-	req.Header.Set("Authorization", "Bearer "+user.AccessToken)
+	req.Header.Set("Authorization", "Bearer "+accessToken)
 
 	client := &http.Client{}
 	_, err = client.Do(req)
@@ -242,7 +250,7 @@ func SkipToNextSong(deviceID, sessionID string, userDB database.UserInterface) e
 	return nil
 }
 
-func SkipToPreviousSong(deviceID, sessionID string, userDB database.UserInterface) error {
+func SkipToPreviousSong(deviceID, sessionID string, userDB database.UserInterface, config *configs.Config) error {
 	url := fmt.Sprintf("https://api.spotify.com/v1/me/player/previous?device_id=%s", deviceID)
 
 	req, err := http.NewRequest("POST", url, nil)
@@ -256,8 +264,10 @@ func SkipToPreviousSong(deviceID, sessionID string, userDB database.UserInterfac
 		return err
 	}
 
+	accessToken, err := utils.GetValidAccessToken(user, userDB, config)
+
 	req.Header.Set("Content-Type", "application/json")
-	req.Header.Set("Authorization", "Bearer "+user.AccessToken)
+	req.Header.Set("Authorization", "Bearer "+accessToken)
 
 	client := &http.Client{}
 	_, err = client.Do(req)

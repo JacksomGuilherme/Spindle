@@ -35,7 +35,7 @@ func (h *PlaybackHandler) Play(w http.ResponseWriter, r *http.Request) {
 	}
 	cookie, _ := utils.LerCookie(r)
 
-	err = services.PlayContext(playReq, deviceID, cookie["session_id"], h.UserDB)
+	err = services.PlayContext(playReq, deviceID, cookie["session_id"], h.UserDB, h.Config)
 	if err != nil {
 		w.WriteHeader(http.StatusInternalServerError)
 		return
@@ -61,7 +61,7 @@ func (h *PlaybackHandler) Pause(w http.ResponseWriter, r *http.Request) {
 
 	deviceID := r.URL.Query().Get("device_id")
 
-	err := services.PausePlayback(deviceID, cookie["session_id"], h.UserDB)
+	err := services.PausePlayback(deviceID, cookie["session_id"], h.UserDB, h.Config)
 	if err != nil {
 		w.WriteHeader(http.StatusInternalServerError)
 		return
@@ -88,7 +88,7 @@ func (h *PlaybackHandler) Next(w http.ResponseWriter, r *http.Request) {
 
 	deviceID := r.URL.Query().Get("device_id")
 
-	err := services.SkipToNextSong(deviceID, cookie["session_id"], h.UserDB)
+	err := services.SkipToNextSong(deviceID, cookie["session_id"], h.UserDB, h.Config)
 	if err != nil {
 		w.WriteHeader(http.StatusInternalServerError)
 		return
@@ -114,7 +114,7 @@ func (h *PlaybackHandler) Previous(w http.ResponseWriter, r *http.Request) {
 
 	deviceID := r.URL.Query().Get("device_id")
 
-	err := services.SkipToPreviousSong(deviceID, cookie["session_id"], h.UserDB)
+	err := services.SkipToPreviousSong(deviceID, cookie["session_id"], h.UserDB, h.Config)
 	if err != nil {
 		w.WriteHeader(http.StatusInternalServerError)
 		return
