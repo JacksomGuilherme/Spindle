@@ -2,6 +2,7 @@ package utils
 
 import (
 	"encoding/json"
+	"fmt"
 	"net/http"
 	"net/url"
 	"strings"
@@ -17,7 +18,7 @@ func ExchangeCodeForToken(code string, config *configs.Config) (*dao.TokenRespon
 	data := url.Values{}
 	data.Set("grant_type", "authorization_code")
 	data.Set("code", code)
-	data.Set("redirect_uri", "https://192.168.15.2:8080/auth/spotify/callback")
+	data.Set("redirect_uri", fmt.Sprintf("%s:%s/auth/spotify/callback", config.Dns, config.WebServerPort))
 
 	req, err := http.NewRequest("POST", "https://accounts.spotify.com/api/token", strings.NewReader(data.Encode()))
 	if err != nil {
@@ -86,7 +87,10 @@ func refreshAccessToken(refreshToken string, config *configs.Config) (*dao.Token
 	req.SetBasicAuth(config.AppClientID, config.AppClientSecret)
 	req.Header.Set("Content-Type", "application/x-www-form-urlencoded")
 
-	resp, _ := http.DefaultClient.Do(req)
+	resp, err := http.DefaultClient.Do(req)
+	if err != nil {
+		return nil, err
+	}
 	defer resp.Body.Close()
 
 	var token dao.TokenResponse

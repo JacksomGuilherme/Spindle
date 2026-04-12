@@ -22,7 +22,6 @@ func GetUserPlaylists(limit, offset int, user *entity.User, userDB database.User
 	}
 	accessToken, err := utils.GetValidAccessToken(user, userDB, config)
 	if err != nil {
-		fmt.Println(err)
 		return nil
 	}
 
@@ -30,7 +29,6 @@ func GetUserPlaylists(limit, offset int, user *entity.User, userDB database.User
 
 	resp, err := http.DefaultClient.Do(req)
 	if err != nil {
-		fmt.Println(err)
 		return nil
 	}
 	defer resp.Body.Close()
@@ -187,8 +185,7 @@ func PlayContext(playRequest dao.PlaybackRequest, deviceID, sessionID string, us
 	req.Header.Set("Content-Type", "application/json")
 	req.Header.Set("Authorization", "Bearer "+accessToken)
 
-	client := &http.Client{}
-	_, err = client.Do(req)
+	_, err = http.DefaultClient.Do(req)
 	if err != nil {
 		return err
 	}
@@ -215,8 +212,7 @@ func PausePlayback(deviceID, sessionID string, userDB database.UserInterface, co
 	req.Header.Set("Content-Type", "application/json")
 	req.Header.Set("Authorization", "Bearer "+accessToken)
 
-	client := &http.Client{}
-	_, err = client.Do(req)
+	_, err = http.DefaultClient.Do(req)
 	if err != nil {
 		return err
 	}
@@ -242,8 +238,7 @@ func SkipToNextSong(deviceID, sessionID string, userDB database.UserInterface, c
 	req.Header.Set("Content-Type", "application/json")
 	req.Header.Set("Authorization", "Bearer "+accessToken)
 
-	client := &http.Client{}
-	_, err = client.Do(req)
+	_, err = http.DefaultClient.Do(req)
 	if err != nil {
 		return err
 	}
@@ -269,8 +264,7 @@ func SkipToPreviousSong(deviceID, sessionID string, userDB database.UserInterfac
 	req.Header.Set("Content-Type", "application/json")
 	req.Header.Set("Authorization", "Bearer "+accessToken)
 
-	client := &http.Client{}
-	_, err = client.Do(req)
+	_, err = http.DefaultClient.Do(req)
 	if err != nil {
 		return err
 	}

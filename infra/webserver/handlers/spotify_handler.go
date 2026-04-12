@@ -83,9 +83,16 @@ func (h *SpotifyLoginHandler) Callback(w http.ResponseWriter, r *http.Request) {
 	encryptedAccess, _ := utils.Encrypt(token.AccessToken, h.Config.EncryptionKey)
 	encryptedRefresh, _ := utils.Encrypt(token.RefreshToken, h.Config.EncryptionKey)
 
-	user := entity.NewUser(userID, encryptedAccess, encryptedRefresh, expiresAt)
-
-	h.UserDB.Create(user)
+	existingUser, _ := h.UserDB.FindBySpotifyUserId(userID)
+	if existingUser == nil {
+		user := entity.NewUser(userID, encryptedAccess, encryptedRefresh, expiresAt)
+		h.UserDB.Create(user)
+	} else {
+		existingUser.AccessToken = encryptedAccess
+		existingUser.RefreshToken = encryptedRefresh
+		existingUser.ExpiresAt = expiresAt
+		h.UserDB.Update(existingUser)
+	}
 
 	utils.ExecutarTemplate(w, "callback.html", map[string]interface{}{
 		"Success": true,

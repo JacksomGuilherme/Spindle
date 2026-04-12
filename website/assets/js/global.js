@@ -243,7 +243,6 @@ function updateUI(data) {
 
     if (data.item.artists && data.item.name) {
         let artistNames = data.item.artists.map(artist => artist.name).join(", ")
-        console.log(data.item.artists)
         document.getElementById("playback-song").innerText = data.item.name
         document.getElementById("playback-artist").innerText = artistNames
     }

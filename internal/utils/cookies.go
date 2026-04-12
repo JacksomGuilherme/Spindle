@@ -25,9 +25,12 @@ func SalvarCookie(w http.ResponseWriter, userID string) error {
 	}
 
 	http.SetCookie(w, &http.Cookie{
-		Name:  "dados",
-		Value: dadosCodificados,
-		Path:  "/",
+		Name:     "dados",
+		Value:    dadosCodificados,
+		Expires:  time.Now().Add(30 * 24 * time.Hour),
+		Path:     "/",
+		HttpOnly: true,
+		Secure:   true,
 	})
 
 	return nil

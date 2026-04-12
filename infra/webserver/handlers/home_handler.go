@@ -53,6 +53,10 @@ func (h *HomeHandler) Home(w http.ResponseWriter, r *http.Request) {
 	offset := page * limit
 
 	content := getContent("playlists", limit, offset, "", user, h.UserDB, h.Config)
+	if content == nil {
+		w.WriteHeader(http.StatusBadRequest)
+		return
+	}
 
 	userDevices, err := services.GetUserDevices(user, h.UserDB, h.Config)
 	if err != nil {
