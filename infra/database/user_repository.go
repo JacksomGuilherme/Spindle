@@ -1,7 +1,7 @@
 package database
 
 import (
-	"github.com/JacksomGuilherme/Kindle-Spotify-Controller/internal/entity"
+	"github.com/JacksomGuilherme/Spindle/internal/entity"
 	"gorm.io/gorm"
 )
 

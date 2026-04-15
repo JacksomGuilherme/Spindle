@@ -3,8 +3,8 @@ package database
 import (
 	"fmt"
 
-	"github.com/JacksomGuilherme/Kindle-Spotify-Controller/configs"
-	"github.com/JacksomGuilherme/Kindle-Spotify-Controller/internal/entity"
+	"github.com/JacksomGuilherme/Spindle/configs"
+	"github.com/JacksomGuilherme/Spindle/internal/entity"
 	"gorm.io/driver/mysql"
 	"gorm.io/gorm"
 )

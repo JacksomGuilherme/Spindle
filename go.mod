@@ -1,4 +1,4 @@
-module github.com/JacksomGuilherme/Kindle-Spotify-Controller
+module github.com/JacksomGuilherme/Spindle
 
 go 1.24.4
 

@@ -4,7 +4,7 @@ import (
 	"net/http"
 	"time"
 
-	"github.com/JacksomGuilherme/Kindle-Spotify-Controller/configs"
+	"github.com/JacksomGuilherme/Spindle/configs"
 	"github.com/gorilla/securecookie"
 )
 

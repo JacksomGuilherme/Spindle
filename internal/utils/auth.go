@@ -8,10 +8,10 @@ import (
 	"strings"
 	"time"
 
-	"github.com/JacksomGuilherme/Kindle-Spotify-Controller/configs"
-	"github.com/JacksomGuilherme/Kindle-Spotify-Controller/infra/database"
-	"github.com/JacksomGuilherme/Kindle-Spotify-Controller/internal/dao"
-	"github.com/JacksomGuilherme/Kindle-Spotify-Controller/internal/entity"
+	"github.com/JacksomGuilherme/Spindle/configs"
+	"github.com/JacksomGuilherme/Spindle/infra/database"
+	"github.com/JacksomGuilherme/Spindle/internal/dao"
+	"github.com/JacksomGuilherme/Spindle/internal/entity"
 )
 
 func ExchangeCodeForToken(code string, config *configs.Config) (*dao.TokenResponse, error) {

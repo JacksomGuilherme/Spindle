@@ -1,6 +1,6 @@
 package database
 
-import "github.com/JacksomGuilherme/Kindle-Spotify-Controller/internal/entity"
+import "github.com/JacksomGuilherme/Spindle/internal/entity"
 
 type UserInterface interface {
 	Create(user *entity.User) error

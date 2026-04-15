@@ -5,10 +5,10 @@ import (
 	"net/http"
 	"strconv"
 
-	"github.com/JacksomGuilherme/Kindle-Spotify-Controller/configs"
-	"github.com/JacksomGuilherme/Kindle-Spotify-Controller/infra/database"
-	"github.com/JacksomGuilherme/Kindle-Spotify-Controller/internal/entity"
-	"github.com/JacksomGuilherme/Kindle-Spotify-Controller/internal/utils"
+	"github.com/JacksomGuilherme/Spindle/configs"
+	"github.com/JacksomGuilherme/Spindle/infra/database"
+	"github.com/JacksomGuilherme/Spindle/internal/entity"
+	"github.com/JacksomGuilherme/Spindle/internal/utils"
 	"github.com/skip2/go-qrcode"
 )
 
